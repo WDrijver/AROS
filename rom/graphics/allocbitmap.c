@@ -626,6 +626,14 @@ static BOOL own_friend_colors(struct BitMap *nbm, struct BitMap *friend_bitmap, 
                 if(ok) {
                     struct BitMap *pbm = NULL;
 
+                    /*
+                     * Mark this as a HIDD bitmap before clearing it: BltBitMap()
+                     * tells HIDD from planar bitmaps by the pad field; without
+                     * the mark the clear below took the path for plain planar
+                     * bitmaps instead of clearing the HIDD bitmap.
+                     */
+                    nbm->pad = HIDD_BM_PAD_MAGIC;
+
                     if(clear)
                         BltBitMap(nbm, 0, 0, nbm, 0, 0, sizex, sizey, 0x00, 0xFF, NULL);
 
@@ -641,9 +649,6 @@ static BOOL own_friend_colors(struct BitMap *nbm, struct BitMap *friend_bitmap, 
                         nbm->Flags |= BMF_STANDARD | (flags & BMF_DISPLAYABLE)
                             | (pbm->Flags & BMF_INTERLEAVED);
                     }
-
-                    /* Mark this is a HIDD bitmap via the pad field */
-                    nbm->pad = HIDD_BM_PAD_MAGIC;
 
                     ReturnPtr("AllocBitMap", struct BitMap *, nbm);
                 }
